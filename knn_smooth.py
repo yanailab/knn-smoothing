@@ -63,7 +63,7 @@ def knn_smoothing(X, k, num_jobs=1):
         # sort the distances and generate new smoothed matrix
         t0 = time.time()
         A = np.argsort(D, axis=1, kind='mergesort')
-        for j in range(matrix.shape[1]):
+        for j in range(X.shape[1]):
             ind = A[j, :(k_step+1)]
             S[:, j] = np.sum(X[:, ind], axis=1)
 
