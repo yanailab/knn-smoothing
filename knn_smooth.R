@@ -46,6 +46,7 @@ calculate_distances <- function(mat){
 #' plot(X[1, ], X[3, ], col=factor(y), main='original')
 #' plot(S[1, ], S[3, ], col=factor(y), main='smoothed')
 knn_smoothing <- function(mat, k=5){
+  if (k > ncol(mat)) stop('k should not be greater than the number of available samples')
   cname <- colnames(mat)
   gname <- rownames(mat)
   num_powers <- ceiling(log2(k + 1))
