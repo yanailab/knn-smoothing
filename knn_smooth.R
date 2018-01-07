@@ -7,19 +7,19 @@
 library(Matrix)
 library(magrittr)
 
-freeman_tukey_transform <- function(mat){
+r_freeman_tukey_transform <- function(mat){
   sqrt(mat) + sqrt(mat + 1)
 }
 
-calculate_distances <- function(mat){
+r_calculate_distances <- function(mat){
   # mat: gene by sample
   # normalize to median transcript count
   num_transcripts <- Matrix::colSums(mat)
   size_factor <- median(num_transcripts, na.rm = T) / num_transcripts
-  
+
   mat_norm <- t(t(mat) * size_factor)
   # apply freeman-tukey transform
-  mat_FTT <- freeman_tukey_transform(mat_norm)
+  mat_FTT <- r_freeman_tukey_transform(mat_norm)
   # calculate all pairwise distances using the Euclidean metric
   mat_D <- dist(t(mat_FTT), method = "euclidean",
                upper = T, diag = T)
@@ -45,7 +45,7 @@ calculate_distances <- function(mat){
 #' S <- knn_smoothing(X, k=5)
 #' plot(X[1, ], X[3, ], col=factor(y), main='original')
 #' plot(S[1, ], S[3, ], col=factor(y), main='smoothed')
-knn_smoothing <- function(mat, k=5){
+r_knn_smoothing <- function(mat, k=5){
   if (k > ncol(mat)) stop('k should not be greater than the number of available samples')
   cname <- colnames(mat)
   gname <- rownames(mat)
@@ -55,7 +55,7 @@ knn_smoothing <- function(mat, k=5){
     k_step <- min(2^p - 1, k)
     message(paste0('Step ', p, '/', num_powers, ':',
                    'Smoothing using k=', k_step))
-    D <- calculate_distances(S)
+    D <- r_calculate_distances(S)
     S <- sapply(cname, function(cn){
       closest_id <- D[cn, ] %>% sort(.) %>%
         head(., k_step+1) %>%
