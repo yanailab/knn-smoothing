@@ -45,7 +45,7 @@ def knn_smoothing(X, k, num_jobs=1):
         The number of threads to use. See scikit-learn's
         documentation of the `pairwise_distances` function.
     """
-    assert k < X.shape[1]
+    assert k <= X.shape[1]
     num_powers = ceil(log(k+1)/log(2))
     S = X.copy()
 
