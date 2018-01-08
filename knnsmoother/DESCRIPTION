@@ -16,11 +16,14 @@ Description: This is the R implementation of the algorithm based on KNN to smoot
     aggregating their UMI counts. See publication: "K-nearest neighbor smoothing
     for high-throughput single-cell RNA-Seq data" (Florian Wagner, Yun Yan, Itai
     Yanai, bioRxiv 217737; doi: https://doi.org/10.1101/217737).
-License: BSD 3-clause
+License: No License (to be determined)
 URL: https://github.com/yanailab/knn-smoothing
 BugReports: https://github.com/yanailab/knn-smoothing/issues?q=label%3AR
 Imports: Rcpp (>= 0.12.14), RcppArmadillo (>= 0.8.100.1.0), Matrix, magrittr
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
 RoxygenNote: 6.0.1
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

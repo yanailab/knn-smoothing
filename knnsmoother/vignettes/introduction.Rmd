@@ -1,0 +1,141 @@
+---
+title: "K-nearest neighbor smoothing for UMI-filtered single-cell RNA-Seq data"
+author: "Yun Yan"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Install
+The package `knnsmoother` depends on `Rcpp` and `RcppArmadillo`. It is suggested to install by using `devtools`. Run the following commands in a R console for installation.
+
+``` R
+install.packages("devtools")
+devtools::install_github('yanailab/knn-smoothing', subdir = 'knnsmoother')
+```
+
+# Get started
+
+```{r}
+library(knnsmoother)
+num_genes <- 20
+num_cells <- 100
+x <- matrix(sample.int(num_genes*num_cells, replace = T), ncol = num_cells)
+rownames(x) <- paste0('g', seq_len(nrow(x)))
+colnames(x) <- paste0('c', seq_len(ncol(x)))
+smoothed_x <- knn_smoothing(X = x, k = 5)
+```
+
+# Case study
+
+```{r}
+suppressPackageStartupMessages(library(Matrix))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(knnsmoother))
+suppressPackageStartupMessages(library(microbenchmark))
+```
+
+# Performance
+
+## Download input and prepare a expression matrix
+
+Download from 10X Genomics dataset website.
+```{r}
+# pbmc4k
+http_pbmc4k <- 'http://cf.10xgenomics.com/samples/cell-exp/2.1.0/pbmc4k/pbmc4k_filtered_gene_bc_matrices.tar.gz'
+```
+
+```{r}
+demo_dir <- tempdir()
+savetotar <- file.path(demo_dir, 'demo_data.tar.gz')
+cmd <- paste('wget -nv ', http_pbmc4k,
+             '-O', savetotar)
+system(cmd)
+```
+
+```{r}
+demo_data_dir <- file.path(demo_dir, 'demo_data')
+dir.create(demo_data_dir)
+cmd <- paste('tar -zxvf', savetotar,
+             '--directory', demo_data_dir)
+system(cmd)
+```
+
+Read expression profile by using `Seurat` package.
+```{r}
+# expr_spmat <- Read10X(file.path(
+#   demo_data_dir, 'filtered_gene_bc_matrices', 'GRCh38'))
+expr_spmat <- Matrix::readMM(file.path(
+  demo_data_dir, 'filtered_gene_bc_matrices', 'GRCh38', 'matrix.mtx'))
+```
+
+Convert sparse matrix to common matrix format.
+```{r}
+print(class(expr_spmat))
+expr_mat <- as.matrix(expr_spmat)
+print(dim(expr_mat))
+```
+
+Filtering out genes that have never been detected in any cell, and cells with less 100 UMIs in total.
+```{r}
+g_use_idx <- rowSums(expr_mat) > 0
+c_use_idx <- colSums(expr_mat) >= 100
+expr_mat <- expr_mat[g_use_idx, c_use_idx]
+print(paste(nrow(expr_mat), 'genes', 'x', ncol(expr_mat), 'cells'))
+```
+
+## Performance
+
+### Smoothing with different `k`s
+
+```{r}
+verbose <- 1000
+tm_k <- microbenchmark(
+  knn_smoothing(expr_mat, k=0, verbose=verbose),
+  knn_smoothing(expr_mat, k=1, verbose=verbose),
+  knn_smoothing(expr_mat, k=10, verbose=verbose),
+  knn_smoothing(expr_mat, k=100, verbose=verbose),
+  knn_smoothing(expr_mat, k=1000, verbose=verbose),
+  times=5
+)
+```
+```{r}
+autoplot(tm_k)
+```
+```{r}
+knitr::kable(tm_k)
+```
+
+### Smoothing with different data size
+
+```{r}
+expr_mat_n100   <- expr_mat[, 1:100]
+expr_mat_n1000  <- expr_mat[, 1:1000]
+expr_mat_n2000  <- expr_mat[, 1:2000]
+expr_mat_n4000  <- expr_mat[, 1:4000]
+expr_mat_n8000  <- cbind(expr_mat_n4000, expr_mat_n4000)
+expr_mat_n16000 <- cbind(expr_mat_n8000, expr_mat_n8000)
+```
+
+```{r}
+tm_size <- microbenchmark(
+  knn_smoothing(expr_mat_n100,   k=50, verbose=verbose),
+  knn_smoothing(expr_mat_n1000,  k=50, verbose=verbose),
+  knn_smoothing(expr_mat_n2000,  k=50, verbose=verbose),
+  knn_smoothing(expr_mat_n4000,  k=50, verbose=verbose),
+  knn_smoothing(expr_mat_n16000, k=50, verbose=verbose),
+  times=5
+)
+```
+
+```{r}
+autoplot(tm_size)
+```
+```{r}
+knitr::kable(tm_size)
+```
