@@ -77,7 +77,7 @@ expr_spmat <- Matrix::readMM(file.path(
 Convert sparse matrix to common matrix format.
 ```{r}
 print(class(expr_spmat))
-expr_mat <- as.matrix(expr_spmat)
+expr_mat <- as.matrix(expr_spmat); rm(expr_spmat);
 print(dim(expr_mat))
 ```
 
@@ -129,8 +129,7 @@ tm_size <- microbenchmark(
   knn_smoothing(expr_mat_n2000,  k=50, verbose=verbose),
   knn_smoothing(expr_mat_n4000,  k=50, verbose=verbose),
   knn_smoothing(expr_mat_n16000, k=50, verbose=verbose),
-  times=5
-)
+  times=3)
 ```
 
 ```{r}

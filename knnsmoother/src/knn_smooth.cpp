@@ -104,7 +104,7 @@ NumericMatrix aggregate_k_nearest(
       "Force k=#samples." << std::endl;
     k = Xr.ncol();
   }
-  if (all(is_na(Dr))) Dr = smoother_calc_distance(Xr);
+  if (all(is_na(Dr))) Dr = smoother_calc_distance(Xr, verbose);
 
   if (verbose > 2) Rcout << "aggregating neighbours... " ;
   mat D = as<mat>(Dr);
