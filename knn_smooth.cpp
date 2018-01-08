@@ -64,10 +64,11 @@ NumericMatrix calculate_distances(NumericMatrix X, int verbose=0){
 }
 
 // [[Rcpp::export]]
-NumericMatrix aggregate_k_nearest(NumericMatrix Xr,
-                                  NumericMatrix Dr,
-                                  int k=2,
-                                  int verbose=0){
+NumericMatrix aggregate_k_nearest(
+    NumericMatrix Xr,
+    NumericMatrix Dr = NumericMatrix(),
+    int k=2,
+    int verbose=0){
   // Input:
   // - X: a matrix in a shape of #genes x #samples.
   // - D: a predefined distance matrix in a shape of #samples x #samples.
@@ -83,6 +84,7 @@ NumericMatrix aggregate_k_nearest(NumericMatrix Xr,
   }
   if (verbose > 2) Rcout << "aggregating neighbours... " ;
 
+  if (all(is_na(Dr))) {Dr = calculate_distances(Xr);}
   mat D = as<mat>(Dr);
   mat X = as<mat>(Xr);
   mat S(X.n_rows, X.n_cols);
@@ -127,7 +129,7 @@ NumericMatrix knn_smoothing(NumericMatrix Xr,
 num_genes = 5
 num_samples = 10
 x <- matrix(abs(sin(seq(from=1, to=num_samples*num_genes))) * 100,
-            ncol = num_samples, byrow = T)
+            ncol = num_samples, byrow = F)
 colnames(x) <- paste0('cell', seq_len(ncol(x)))
 rownames(x) <- paste0('gene', seq_len(nrow(x)))
 xd <- as.matrix(dist(t(x)))
@@ -135,5 +137,6 @@ print(all.equal(c(as.matrix(dist(t(x), method = "euclidean", upper=T, diag=T))),
                 c(dist_euclidean(t(x), t(x))) ))
 print(all.equal(c(r_freeman_tukey_transform(x)), c(freeman_tukey_transform(x))))
 print(all.equal(c(r_calculate_distances(x)), c(calculate_distances(x))))
-print(all.equal(c(r_knn_smoothing(x,k=0)), c(knn_smoothing(x, k=0,verbose=3))))
+print(all.equal(c(r_knn_smoothing(x,k=10)), c(knn_smoothing(x, k=10,verbose=3))))
+aggregate_k_nearest(x)
 */
