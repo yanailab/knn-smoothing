@@ -31,10 +31,7 @@ r_calculate_distances <- function(mat){
 #'
 #' @param mat A numeric matrix with gene names on rows and cell names on columns.
 #' @param k Number of nearest neighbours to aggregate.
-#'
 #' @return A smoothed numeric matrix.
-#' @export
-#'
 #' @examples
 #' X <- matrix(abs(sin(seq(from=1, to=1000, length.out = 1000))),
 #' nrow = 25, byrow = T)
