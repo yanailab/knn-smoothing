@@ -43,8 +43,8 @@ NumericMatrix dist_euclidean(NumericMatrix Ar, NumericMatrix Br) {
   colvec Bn =  sum(square(B), 1);
 
   mat C = -2 * (A * B.t());
-  C.each_col() += An;
-  C.each_row() += Bn.t();
+  C.each_col() += An; checkUserInterrupt();
+  C.each_row() += Bn.t(); checkUserInterrupt();
 
   return wrap(sqrt(C));
 }
@@ -93,18 +93,20 @@ NumericMatrix smoother_calc_distance(NumericMatrix X, int verbose=0){
 //' @return An aggregated matrix in a same shape of \code{Xr}.
 //' @export
 // [[Rcpp::export]]
-NumericMatrix aggregate_k_nearest(NumericMatrix Xr,
-                                  NumericMatrix Dr,
-                                  int k=2,
-                                  int verbose=0){
+NumericMatrix aggregate_k_nearest(
+    NumericMatrix Xr,
+    NumericMatrix Dr = NumericMatrix(),
+    int k=2,
+    int verbose=0) {
   if (k > Xr.ncol()) {
     Rcout << "Specified k=" << k << \
       " is greater than #samples=" << Xr.ncol() << ". " << \
       "Force k=#samples." << std::endl;
     k = Xr.ncol();
   }
-  if (verbose > 2) Rcout << "aggregating neighbours... " ;
+  if (all(is_na(Dr))) Dr = smoother_calc_distance(Xr);
 
+  if (verbose > 2) Rcout << "aggregating neighbours... " ;
   mat D = as<mat>(Dr);
   mat X = as<mat>(Xr);
   mat S(X.n_rows, X.n_cols);
@@ -125,26 +127,24 @@ NumericMatrix aggregate_k_nearest(NumericMatrix Xr,
 }
 
 
-//' Aggregate K nearest expression profiles
+//' Perform KNN-smoothing on UMI-filtered scRNA-seq data
 //'
-//' Normalize (by median) and apply Freeman-Tukey transformation on the input
-//' matrix \code{X}. Then calculate the distance matrix of samples.
-//'
-//' @param Xr A matrix in a shape of #genes x #samples.
-//' @param Dr A predefined distance matrix in a shape of #samples x #samples. If
-//'   not specified, D is the distance matrix of the input \code{Xr}.
+//' @param X A matrix in a shape of #genes x #samples.
 //' @param k An integer to choose \code{k} nearest samples (self-inclusive) to
 //'  aggregate based on the distance matrix \code{Dr}. If \code{k} is greater than
 //'  #samples, \code{k} is forced to be #samples to continue aggregation.
 //' @param verbose An integer to specify verbose level.
-//' @return An aggregated matrix in a same shape of \code{Xr}.
+//' @return An aggregated matrix in a same shape of \code{X}.
+//' @references  "K-nearest neighbor smoothing for high-throughput single-cell
+//'   RNA-Seq data" (Florian Wagner, Yun Yan, Itai Yanai, bioRxiv 217737; doi:
+//'   \url{https://doi.org/10.1101/217737}).
 //' @export
 // [[Rcpp::export]]
-NumericMatrix knn_smoothing(NumericMatrix Xr,
+NumericMatrix knn_smoothing(NumericMatrix X,
                             int k=5,
                             int verbose=0){
-  if (k > Xr.ncol()) stop("k (", k, ") is greater than the number of samples.");
-  NumericMatrix S = clone(Xr);
+  if (k > X.ncol()) stop("k (", k, ") is greater than the number of samples.");
+  NumericMatrix S = clone(X);
 
   int num_powers = ceil(log1p(k) / log(2));
   for (int p = 1; p < num_powers + 1; p++){
@@ -155,7 +155,9 @@ NumericMatrix knn_smoothing(NumericMatrix Xr,
         "Smoothing with k=" << k_step << " " << std::endl;
 
     NumericMatrix D = smoother_calc_distance(S, verbose);
-    S = aggregate_k_nearest(Xr, D, k_step+1, verbose);
+    checkUserInterrupt();
+    S = aggregate_k_nearest(X, D, k_step+1, verbose);
+    checkUserInterrupt();
   }
   if (verbose > 2) Rcout << "[KNN-Smoothing Finished]" << std::endl;
   return S;

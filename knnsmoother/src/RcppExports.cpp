@@ -6,55 +6,75 @@
 
 using namespace Rcpp;
 
-// rcpparma_hello_world
-arma::mat rcpparma_hello_world();
-RcppExport SEXP _knnsmoother_rcpparma_hello_world() {
+// freeman_tukey_transform
+NumericMatrix freeman_tukey_transform(NumericMatrix X);
+RcppExport SEXP _knnsmoother_freeman_tukey_transform(SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpparma_hello_world());
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(freeman_tukey_transform(X));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpparma_outerproduct
-arma::mat rcpparma_outerproduct(const arma::colvec& x);
-RcppExport SEXP _knnsmoother_rcpparma_outerproduct(SEXP xSEXP) {
+// dist_euclidean
+NumericMatrix dist_euclidean(NumericMatrix Ar, NumericMatrix Br);
+RcppExport SEXP _knnsmoother_dist_euclidean(SEXP ArSEXP, SEXP BrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_outerproduct(x));
+    Rcpp::traits::input_parameter< NumericMatrix >::type Ar(ArSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Br(BrSEXP);
+    rcpp_result_gen = Rcpp::wrap(dist_euclidean(Ar, Br));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpparma_innerproduct
-double rcpparma_innerproduct(const arma::colvec& x);
-RcppExport SEXP _knnsmoother_rcpparma_innerproduct(SEXP xSEXP) {
+// smoother_calc_distance
+NumericMatrix smoother_calc_distance(NumericMatrix X, int verbose);
+RcppExport SEXP _knnsmoother_smoother_calc_distance(SEXP XSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_innerproduct(x));
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(smoother_calc_distance(X, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpparma_bothproducts
-Rcpp::List rcpparma_bothproducts(const arma::colvec& x);
-RcppExport SEXP _knnsmoother_rcpparma_bothproducts(SEXP xSEXP) {
+// aggregate_k_nearest
+NumericMatrix aggregate_k_nearest(NumericMatrix Xr, NumericMatrix Dr, int k, int verbose);
+RcppExport SEXP _knnsmoother_aggregate_k_nearest(SEXP XrSEXP, SEXP DrSEXP, SEXP kSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_bothproducts(x));
+    Rcpp::traits::input_parameter< NumericMatrix >::type Xr(XrSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Dr(DrSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(aggregate_k_nearest(Xr, Dr, k, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// knn_smoothing
+NumericMatrix knn_smoothing(NumericMatrix X, int k, int verbose);
+RcppExport SEXP _knnsmoother_knn_smoothing(SEXP XSEXP, SEXP kSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(knn_smoothing(X, k, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_knnsmoother_rcpparma_hello_world", (DL_FUNC) &_knnsmoother_rcpparma_hello_world, 0},
-    {"_knnsmoother_rcpparma_outerproduct", (DL_FUNC) &_knnsmoother_rcpparma_outerproduct, 1},
-    {"_knnsmoother_rcpparma_innerproduct", (DL_FUNC) &_knnsmoother_rcpparma_innerproduct, 1},
-    {"_knnsmoother_rcpparma_bothproducts", (DL_FUNC) &_knnsmoother_rcpparma_bothproducts, 1},
+    {"_knnsmoother_freeman_tukey_transform", (DL_FUNC) &_knnsmoother_freeman_tukey_transform, 1},
+    {"_knnsmoother_dist_euclidean", (DL_FUNC) &_knnsmoother_dist_euclidean, 2},
+    {"_knnsmoother_smoother_calc_distance", (DL_FUNC) &_knnsmoother_smoother_calc_distance, 2},
+    {"_knnsmoother_aggregate_k_nearest", (DL_FUNC) &_knnsmoother_aggregate_k_nearest, 4},
+    {"_knnsmoother_knn_smoothing", (DL_FUNC) &_knnsmoother_knn_smoothing, 3},
     {NULL, NULL, 0}
 };
 
