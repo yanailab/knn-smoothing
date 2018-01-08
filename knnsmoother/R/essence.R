@@ -11,6 +11,7 @@ r_freeman_tukey_transform <- function(mat){
   sqrt(mat) + sqrt(mat + 1)
 }
 
+
 r_calculate_distances <- function(mat){
   # mat: gene by sample
   # normalize to median transcript count
@@ -27,21 +28,21 @@ r_calculate_distances <- function(mat){
 }
 
 
-#' KNN-smoothing on UMI-filtered single-cell RNA-seq data
-#'
-#' @param mat A numeric matrix with gene names on rows and cell names on columns.
-#' @param k Number of nearest neighbours to aggregate.
-#' @return A smoothed numeric matrix.
-#' @examples
-#' X <- matrix(abs(sin(seq(from=1, to=1000, length.out = 1000))),
-#' nrow = 25, byrow = T)
-#' y <- rep(1:4, each=10)
-#' dim(X)
-#' colnames(X) <- as.character(paste0('s', seq_len(ncol(X))))
-#' rownames(X) <- as.character(paste0('g', seq_len(nrow(X))))
-#' S <- knn_smoothing(X, k=5)
-#' plot(X[1, ], X[3, ], col=factor(y), main='original')
-#' plot(S[1, ], S[3, ], col=factor(y), main='smoothed')
+#" KNN-smoothing on UMI-filtered single-cell RNA-seq data
+#"
+#" @param mat A numeric matrix with gene names on rows and cell names on columns.
+#" @param k Number of nearest neighbours to aggregate.
+#" @return A smoothed numeric matrix.
+#" @examples
+#" X <- matrix(abs(sin(seq(from=1, to=1000, length.out = 1000))),
+#" nrow = 25, byrow = T)
+#" y <- rep(1:4, each=10)
+#" dim(X)
+#" colnames(X) <- as.character(paste0("s", seq_len(ncol(X))))
+#" rownames(X) <- as.character(paste0("g", seq_len(nrow(X))))
+#" S <- knn_smoothing(X, k=5)
+#" plot(X[1, ], X[3, ], col=factor(y), main="original")
+#" plot(S[1, ], S[3, ], col=factor(y), main="smoothed")
 r_knn_smoothing <- function(mat, k=5){
   if (k > ncol(mat)) stop('k should not be greater than the number of available samples')
   cname <- colnames(mat)

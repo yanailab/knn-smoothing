@@ -143,7 +143,7 @@ NumericMatrix aggregate_k_nearest(
 NumericMatrix knn_smoothing(NumericMatrix X,
                             int k=5,
                             int verbose=0){
-  if (k > X.ncol()) stop("k (", k, ") is greater than the number of samples.");
+  if (k > X.ncol()) stop("k should not be greater than #samples.");
   NumericMatrix S = clone(X);
 
   int num_powers = ceil(log1p(k) / log(2));
