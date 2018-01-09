@@ -1,8 +1,0 @@
-useDynLib(knnsmoother)
-importFrom(Rcpp, evalCpp)
-
-export(aggregate_k_nearest)
-export(dist_euclidean)
-export(freeman_tukey_transform)
-export(knn_smoothing)
-
