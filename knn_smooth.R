@@ -5,25 +5,25 @@
 # Copyright (c) 2017 New York University
 
 library(Matrix)
-library(magrittr)
 
 freeman_tukey_transform <- function(mat){
   sqrt(mat) + sqrt(mat + 1)
 }
 
 pdist <- function(mat){
-  # @param mat a non-negative matrix with samples by features
+  # @param mat A non-negative matrix with samples by features
   # @reference http://r.789695.n4.nabble.com/dist-function-in-R-is-very-slow-td4738317.html
-  mat[is.na(mat)] <- 0
-  mat[mat < 0] <- 0
-
-  mtm <- Matrix::tcrossprod(m)
-  sq <- rowSums(m^2)
-  return(sqrt(outer(sq,sq,"+") - 2*mtm))
+  mtm <- Matrix::tcrossprod(mat)
+  sq <- rowSums(mat^2)
+  suppressWarnings(out <- sqrt(outer(sq, sq, "+") - 2 * mtm))
+  out[is.na(out)] <- 0
+  out[out < 0] <- 0
+  
+  out
 }
 
 smoother_calculate_distances <- function(mat){
-  # @param mat a matrix with genes by samples
+  # @param mat A matrix with genes by samples
 
   # normalize to median transcript count
   num_transcripts <- Matrix::colSums(mat)
@@ -33,30 +33,25 @@ smoother_calculate_distances <- function(mat){
   # apply freeman-tukey transform
   mat_FTT <- freeman_tukey_transform(mat_norm)
   # calculate all pairwise distances using the Euclidean metric
-  mat_D <- pdist(t(mat_FTT), method = "euclidean",
-               upper = T, diag = T)
-  return(as.matrix(mat_D))
+  mat_D <- pdist(t(mat_FTT))
+  
+  as.matrix(mat_D)
 }
 
-smoother_aggregate_nearest_nb <- function(mat, D=NA, k=5){
+smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
   # @param mat A matrix in a shape of #genes x #samples.
   # @param D A predefined distance matrix in a shape of #samples x #samples. If
   #   not specified, D is the distance matrix of the input \code{mat}.
   # @param k An integer to choose \code{k} nearest samples (self-inclusive) to
   #  aggregate based on the distance matrix \code{D}. If \code{k} is greater than
   #  #samples, \code{k} is forced to be #samples to continue aggregation.
-  if (is.na(D)) D <- pdist(mat)
-  S <- sapply(cname, function(cn){
-    closest_id <- D[cn, ] %>% sort(.) %>%
-      head(., k_step+1) %>%
-      names(.)
-    closest_mat <- mat[gname, closest_id] %>%
-      matrix(., nrow=length(gname), byrow = F)
-    rownames(closest_mat) <- gname
-    colnames(closest_mat) <- closest_id
+  if (is.null(D)) D <- pdist(mat)
+  
+  sapply(seq_len(ncol(mat)), function(cid){
+    nb_cid <- head(order(D[cid, ]), k)
+    closest_mat <- mat[, nb_cid]
     return(Matrix::rowSums(closest_mat))
   })
-  S
 }
 
 #' KNN-smoothing on UMI-filtered single-cell RNA-seq data
@@ -71,19 +66,13 @@ smoother_aggregate_nearest_nb <- function(mat, D=NA, k=5){
 #' dim(X)
 #' colnames(X) <- as.character(paste0("s", seq_len(ncol(X))))
 #' rownames(X) <- as.character(paste0("g", seq_len(nrow(X))))
-#' S <- knn_smoothing(X, k=5)
+#' S <- knn_smoother(X, k=5)
 #' plot(X[1, ], X[3, ], col=factor(y), main="original")
 #' plot(S[1, ], S[3, ], col=factor(y), main="smoothed")
+#' @export
 knn_smoother <- function(mat, k=5){
   if (k >= ncol(mat)) stop('k should be less than the number of available samples.')
-  if (any(is.na(mat))) {
-    warning('Input matrix contains NA. Replace with zeros.')
-    mat[is.na(mat)] <- 0
-  }
-  if (any(mat < 0)){
-    warning('Input matrix contains negative values. Replace with zeros.')
-    mat[mat < 0] <- 0
-  }
+
   cname <- colnames(mat)
   gname <- rownames(mat)
 
@@ -94,10 +83,10 @@ knn_smoother <- function(mat, k=5){
     message(paste0('Step ', p, '/', num_powers, ':',
                    'Smoothing using k=', k_step))
     D <- smoother_calculate_distances(S)
-
+    S <- smoother_aggregate_nearest_nb(mat, D, k_step + 1)
   }
-
   if (! is.null(cname)) colnames(S) <- cname
   if (! is.null(gname)) rownames(S) <- gname
+  
   S
 }
