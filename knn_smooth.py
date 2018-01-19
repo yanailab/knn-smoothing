@@ -1,7 +1,9 @@
 # K-nearest neighbor smoothing for UMI-filtered scRNA-Seq data
 # (Python 3 implementation, depends on scikit-learn and numpy.)
 
-# Author: Florian Wagner <florian.wagner@nyu.edu>
+# Authors:
+#   Florian Wagner <florian.wagner@nyu.edu>
+#   Yun Yan <yun.yan@nyumc.org>
 # Copyright (c) 2017 New York University
 
 import time
@@ -9,7 +11,6 @@ import sys
 from math import log, ceil
 
 from sklearn.metrics.pairwise import pairwise_distances
-import pandas as pd
 import numpy as np
 
 import click
@@ -86,6 +87,8 @@ def knn_smoothing(X, k, num_jobs=1):
 @click.option('--saveto', help='Output smoothed UMI-count matrix.')
 @click.option('--sep', help='File sep when reading fpath.', default='\t')
 def main(k, fpath, saveto, sep):
+    import pandas as pd
+
     expr = pd.read_csv(fpath, index_col=0, sep=sep)
     print('Perform KNN Smoothing with K={}'.format(k)); sys.stdout.flush()
     expr_k = knn_smoothing(X=expr.values, k=k)
