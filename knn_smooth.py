@@ -1,7 +1,9 @@
 # K-nearest neighbor smoothing for UMI-filtered scRNA-Seq data
 # (Python 3 implementation, depends on scikit-learn and numpy.)
 
-# Author: Florian Wagner <florian.wagner@nyu.edu>
+# Authors:
+#   Florian Wagner <florian.wagner@nyu.edu>
+#   Yun Yan <yun.yan@nyumc.org>
 # Copyright (c) 2017 New York University
 
 import time
@@ -10,6 +12,8 @@ from math import log, ceil
 
 from sklearn.metrics.pairwise import pairwise_distances
 import numpy as np
+
+import click
 
 
 def _freeman_tukey_transform(X):
@@ -45,7 +49,9 @@ def knn_smoothing(X, k, num_jobs=1):
         The number of threads to use. See scikit-learn's
         documentation of the `pairwise_distances` function.
     """
-    assert k + 1 <= X.shape[1]
+    assert k < X.shape[1], 'Specified k should be smaller than #cells.'
+    assert isinstance(X, np.ndarray), 'Input should be a numpy.ndarray.'
+
     num_powers = ceil(log(k+1)/log(2))
     S = X.copy()
 
@@ -53,7 +59,7 @@ def knn_smoothing(X, k, num_jobs=1):
         k_step = min(pow(2,p)-1, k)
         print('Step %d/%d: Smooth using k=%d'
               % (p, num_powers, k_step)); sys.stdout.flush()
-        
+
         # determine cell-cell distances based on smoothed matrix
         t0 = time.time()
         D = _calculate_pairwise_distances(S, num_jobs=num_jobs)
@@ -71,6 +77,25 @@ def knn_smoothing(X, k, num_jobs=1):
         t1 = time.time()
         print('Calculating the smoothed expression matrix took %.1f s.'
               %(t1-t0)); sys.stdout.flush()
-        
+
     return S
+
+
+@click.command()
+@click.option('--k', default=0, help='Number of K.')
+@click.option('--fpath', help='Input UMI-count matrix.')
+@click.option('--saveto', help='Output smoothed UMI-count matrix.')
+@click.option('--sep', help='File sep when reading fpath.', default='\t')
+def main(k, fpath, saveto, sep):
+    import pandas as pd
+
+    expr = pd.read_csv(fpath, index_col=0, sep=sep)
+    print('Perform KNN Smoothing with K={}'.format(k)); sys.stdout.flush()
+    expr_k = knn_smoothing(X=expr.values, k=k)
+    expr_k = pd.DataFrame(expr_k, index=expr.index, columns=expr.columns)
+    expr_k.to_csv(saveto, sep=sep)
+
+
+if __name__ == '__main__':
+    main()
 
