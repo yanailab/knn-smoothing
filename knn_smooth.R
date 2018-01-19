@@ -15,11 +15,10 @@ pdist <- function(mat){
   # @reference http://r.789695.n4.nabble.com/dist-function-in-R-is-very-slow-td4738317.html
   mtm <- Matrix::tcrossprod(mat)
   sq <- rowSums(mat^2)
-  suppressWarnings(out <- sqrt(outer(sq, sq, "+") - 2 * mtm))
-  out[is.na(out)] <- 0
-  out[out < 0] <- 0
-  
-  out
+  out0 <- outer(sq, sq, "+") - 2 * mtm
+  out0[out0 < 0] <- 0
+
+  sqrt(out0)
 }
 
 smoother_calculate_distances <- function(mat){
@@ -34,7 +33,7 @@ smoother_calculate_distances <- function(mat){
   mat_FTT <- freeman_tukey_transform(mat_norm)
   # calculate all pairwise distances using the Euclidean metric
   mat_D <- pdist(t(mat_FTT))
-  
+
   as.matrix(mat_D)
 }
 
@@ -46,7 +45,7 @@ smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
   #  aggregate based on the distance matrix \code{D}. If \code{k} is greater than
   #  #samples, \code{k} is forced to be #samples to continue aggregation.
   if (is.null(D)) D <- pdist(mat)
-  
+
   sapply(seq_len(ncol(mat)), function(cid){
     nb_cid <- head(order(D[cid, ]), k)
     closest_mat <- mat[, nb_cid]
@@ -87,6 +86,6 @@ knn_smoother <- function(mat, k=5){
   }
   if (! is.null(cname)) colnames(S) <- cname
   if (! is.null(gname)) rownames(S) <- gname
-  
+
   S
 }
