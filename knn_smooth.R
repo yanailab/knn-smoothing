@@ -44,7 +44,7 @@ smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
   # @param k An integer to choose \code{k} nearest samples (self-inclusive) to
   #  aggregate based on the distance matrix \code{D}. If \code{k} is greater than
   #  #samples, \code{k} is forced to be #samples to continue aggregation.
-  if (is.null(D)) D <- pdist(mat)
+  if (is.null(D)) D <- pdist(t(mat))
 
   sapply(seq_len(ncol(mat)), function(cid){
     nb_cid <- head(order(D[cid, ]), k)
