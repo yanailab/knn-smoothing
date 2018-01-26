@@ -39,6 +39,7 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
       --sep TEXT     File sep when reading fpath.
       --help         Show this message and exit.
 
+
 4. Make sure your expression matrix file is formatted correctly
 
    By default, the script expects your expression matrix to be stored as a tab-delimited plain-text file, with gene labels contained in the first column, and cell labels contained in the first row (the top-left "cell" in the matrix can either be empty or contain the first cell label).
