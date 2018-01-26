@@ -30,14 +30,14 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
 
    You should see the following output:
 
-      Usage: knn_smooth.py [OPTIONS]
-      
-      Options:
-      --k INTEGER    Number of K.
-      --fpath TEXT   Input UMI-count matrix.
-      --saveto TEXT  Output smoothed UMI-count matrix.
-      --sep TEXT     File sep when reading fpath.
-      --help         Show this message and exit.
+            Usage: knn_smooth.py [OPTIONS]
+            
+            Options:
+            --k INTEGER    Number of K.
+            --fpath TEXT   Input UMI-count matrix.
+            --saveto TEXT  Output smoothed UMI-count matrix.
+            --sep TEXT     File sep when reading fpath.
+            --help         Show this message and exit.
 
 
 4. Make sure your expression matrix file is formatted correctly
