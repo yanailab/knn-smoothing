@@ -89,11 +89,13 @@ def knn_smoothing(X, k, num_jobs=1):
 def main(k, fpath, saveto, sep):
     import pandas as pd
 
-    expr = pd.read_csv(fpath, index_col=0, sep=sep)
-    print('Perform KNN Smoothing with K={}'.format(k)); sys.stdout.flush()
-    expr_k = knn_smoothing(X=expr.values, k=k)
-    expr_k = pd.DataFrame(expr_k, index=expr.index, columns=expr.columns)
-    expr_k.to_csv(saveto, sep=sep)
+    expr = pd.read_csv(fpath, index_col=0, sep=sep).astype(np.float64)
+    print('Performing KNN Smoothing with k={}'.format(k)); sys.stdout.flush()
+    genes = expr.index
+    cells = expr.columns
+    expr = knn_smoothing(X=expr.values, k=k)
+    expr = pd.DataFrame(expr, index=genes, columns=cells)
+    expr.to_csv(saveto, sep=sep)
 
 
 if __name__ == '__main__':
