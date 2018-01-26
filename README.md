@@ -4,7 +4,7 @@ This repository contains reference Python, R, and Matlab implementations of the 
 
 ### Overview of the different implementations
 
-Even though all implementations should produces the same results, the Python implementation (`knn_smooth.py`) currently runs much faster than the R implementation. This is despite our efforts to optimize the performance of the R implementation.
+Even though all implementations should produce the same results, the Python implementation (`knn_smooth.py`) currently runs much faster than the R implementation. This is despite our efforts to optimize the performance of the R implementation.
 
 If you have a large dataset and/or want to apply smoothing with a large `k`, we therefore recommmend that you either call the Python function `knn_smoothing()` from the `knn_smooth.py` module, or that you run the Python implementation of kNN-smoothing from the command-line (see below).
 
@@ -30,14 +30,14 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
 
    You should see the following output:
 
-     Usage: knn_smooth.py [OPTIONS]
-
-     Options:
-     --k INTEGER    Number of K.
-     --fpath TEXT   Input UMI-count matrix.
-     --saveto TEXT  Output smoothed UMI-count matrix.
-     --sep TEXT     File sep when reading fpath.
-     --help         Show this message and exit.
+      Usage: knn_smooth.py [OPTIONS]
+      
+      Options:
+      --k INTEGER    Number of K.
+      --fpath TEXT   Input UMI-count matrix.
+      --saveto TEXT  Output smoothed UMI-count matrix.
+      --sep TEXT     File sep when reading fpath.
+      --help         Show this message and exit.
 
 4. Make sure your expression matrix file is formatted correctly
 
