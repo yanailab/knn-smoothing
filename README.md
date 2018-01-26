@@ -2,7 +2,15 @@
 
 This repository contains reference Python, R, and Matlab implementations of the k-nearest neighbor smoothing algorithm ([Wagner et al., 2017](https://www.biorxiv.org/content/early/2018/01/24/217737)) for UMI-filtered single-cell RNA-Seq data.
 
+## Overview of the different implementations
+
+Even though all implementations should produces the same results, the Python implementation (`knn_smooth.py`) currently runs much faster than the R implementation. This is despite our efforts to optimize the performance of the R implementation.
+
+If you have a large dataset and/or want to apply smoothing with a large `k`, we therefore recommmend that you either call the Python function `knn_smoothing()` from the `knn_smooth.py` module, or that you run the Python implementation of kNN-smoothing from the command-line (see below).
+
 ## Running kNN-smoothing from the command-line
+
+Follow these instructions to run the Python implementation of kNN-smoothing from the command-line. Since the Python implementation is currently much faster than the R implementation (see above), this is the recommend method to run kNN-smoothing if you don't usually do your data analysis in Python, or if you prefer to work on the command-line.
 
 1. Install dependencies
 
