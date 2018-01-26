@@ -36,7 +36,7 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
             --k INTEGER    Number of K.
             --fpath TEXT   Input UMI-count matrix.
             --saveto TEXT  Output smoothed UMI-count matrix.
-            --sep TEXT     File sep when reading fpath.
+            --sep TEXT     Delimiter of file when reading input and writing output.
             --help         Show this message and exit.
 
 
@@ -44,7 +44,7 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
 
    By default, the script expects your expression matrix to be stored as a tab-delimited plain-text file, with gene labels contained in the first column, and cell labels contained in the first row (the top-left "cell" in the matrix can either be empty or contain the first cell label).
 
-   You can change the separator by passing the `--sep` argument to the script. For example, if you're using comma-separated values (csv), pass `--sep ,`. This will also affect the separator used in the output file.
+   You can change the separator by passing the `--sep` argument to the script. For example, if you're using comma-separated values (csv) for the input file, pass `--sep ,`. It will also be the separator in the output file to avoid format inconsistency.
 
 5. Run smoothing!
 
