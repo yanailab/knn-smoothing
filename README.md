@@ -4,7 +4,7 @@ This repository contains reference Python, R, and Matlab implementations of the 
 
 ### Overview of the different implementations
 
-Even though all implementations should produce the same results, the Python implementation (`knn_smooth.py`) currently runs much faster than the R implementation. This is despite our efforts to optimize the performance of the R implementation.
+Even though all implementations should produce the same results, the Python implementation (`knn_smooth.py`) currently runs much faster than the R implementation. This is despite our efforts to optimize the performance of the R implementation (`knn_smooth.R`).
 
 If you have a large dataset and/or want to apply smoothing with a large `k`, we therefore recommmend that you either call the Python function `knn_smoothing()` from the `knn_smooth.py` module, or that you run the Python implementation of kNN-smoothing from the command-line (see below).
 
