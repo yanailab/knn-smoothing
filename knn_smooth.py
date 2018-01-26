@@ -85,7 +85,7 @@ def knn_smoothing(X, k, num_jobs=1):
 @click.option('--k', default=0, help='Number of K.')
 @click.option('--fpath', help='Input UMI-count matrix.')
 @click.option('--saveto', help='Output smoothed UMI-count matrix.')
-@click.option('--sep', help='File sep when reading fpath.', default='\t')
+@click.option('--sep', help='Delimiter of file when reading input and writing output.', default='\t')
 def main(k, fpath, saveto, sep):
     import pandas as pd
 
