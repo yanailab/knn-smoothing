@@ -1,6 +1,10 @@
-## K-nearest neighbor smoothing for high-throughput single-cell RNA-Seq data
+## kNN-smoothing for single-cell RNA-Seq data
 
-This repository contains reference Python, R, and Matlab implementations of the k-nearest neighbor smoothing algorithm ([Wagner et al., 2017](https://www.biorxiv.org/content/early/2018/01/24/217737)) for UMI-filtered single-cell RNA-Seq data.
+This repository contains reference Python, R, and Matlab implementations of the kNN-smoothing and kNN-smoothing 2 algorithms ([Wagner et al., 2017](https://www.biorxiv.org/content/early/2018/01/24/217737)) for UMI-filtered single-cell RNA-Seq data.
+
+### New! Version 2 of the algorithm released! (4/9/2018)
+
+
 
 ### Overview of the different implementations
 
@@ -34,6 +38,7 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
             
             Options:
             --k INTEGER    Number of K.
+            --d INTEGER
             --fpath TEXT   Input UMI-count matrix.
             --saveto TEXT  Output smoothed UMI-count matrix.
             --sep TEXT     File sep when reading fpath.
@@ -55,3 +60,55 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
    ```
 
    This will produce a smoothed matrix called `expression_smoothed.tsv`.
+
+
+### Sample output
+
+  ``` bash
+  $ python3 knn_smooth.py -k 127 -d 5 -f smoothing_test_data1.tsv -o smoothing_test_results.tsv
+  ```
+
+  ```
+	Loading the data... done. (Took 3.1 s.)
+	The expression matrix contains 19208 genes and 2000 cells.
+
+	Performing kNN-smoothing 2 with k=127 and d=5...
+	Step 1/7: Smooth using k=1
+		PCA took 1.4 s.
+		The fraction of variance explained by the top 5 PCs is 4.8 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 0.7 s.
+	Step 2/7: Smooth using k=3
+		PCA took 1.4 s.
+		The fraction of variance explained by the top 5 PCs is 6.3 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 0.8 s.
+	Step 3/7: Smooth using k=7
+		PCA took 1.4 s.
+		The fraction of variance explained by the top 5 PCs is 8.4 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 1.0 s.
+	Step 4/7: Smooth using k=15
+		PCA took 1.4 s.
+		The fraction of variance explained by the top 5 PCs is 11.7 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 1.6 s.
+	Step 5/7: Smooth using k=31
+		PCA took 1.4 s.
+		The fraction of variance explained by the top 5 PCs is 16.9 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 3.0 s.
+	Step 6/7: Smooth using k=63
+		PCA took 1.5 s.
+		The fraction of variance explained by the top 5 PCs is 25.4 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 5.7 s.
+	Step 7/7: Smooth using k=127
+		PCA took 1.4 s.
+		The fraction of variance explained by the top 5 PCs is 38.7 %.
+		Calculating pair-wise distance matrix took 0.0 s.
+		Calculating the smoothed expression matrix took 10.6 s.
+	kNN-smoothing finished in 37.9 s.
+
+	Writing results to "smoothing_test_results.tsv"... done. (Took 24.0 s.)
+  ```
