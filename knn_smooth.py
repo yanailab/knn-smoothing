@@ -1,5 +1,5 @@
-# K-nearest neighbor smoothing for UMI-filtered scRNA-Seq data
-# (Python 3 implementation, depends on scikit-learn and numpy.
+# K-nearest neighbor smoothing for high-throughput scRNA-Seq data
+# (Python 3 implementation, depends on scikit-learn.
 #  The command-line version also depends on click and pandas.)
 
 # Authors:
@@ -242,15 +242,17 @@ if __name__ == '__main__':
     @click.option('-s', '--seed', default=0, show_default=True,
                 help='Seed for pseudo-random number generator.')
     @click.option('--sep', default='\t', show_default=False,
-                  help='Delimiter separating fpath [default: \\t].')
-    def main(k, d, fpath, saveto, sep, seed):
+                  help='Separator used in input file. The output file will '
+                       'use this separator as well.  [default: \\t]')
+    def main(k, d, fpath, saveto, seed, sep):
 
         if d == 0:
             d = None
 
         print('Loading the data...', end=' '); sys.stdout.flush()
         t0 = time.time()
-        matrix = pd.read_csv(fpath, index_col=0, sep=sep).astype(np.float64)
+        matrix = pd.read_csv(fpath, index_col=0, sep=sep).\
+                    astype(np.float64)
         t1 = time.time()
         print('done. (Took %.1f s.)' % (t1-t0)); sys.stdout.flush()
         p, n = matrix.shape
