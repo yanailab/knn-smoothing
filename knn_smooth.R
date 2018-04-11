@@ -1,40 +1,42 @@
-# K-nearest neighbor smoothing for UMI-filtered scRNA-Seq data
-# (R implementation)
+# K-nearest neighbor smoothing for high-throughput single-cell RNA-Seq data
+# (R implementation.)
 
 # Author: Yun Yan <yun.yan@nyumc.org>
-# Copyright (c) 2017 New York University
+# Copyright (c) 2017, 2018 New York University
 
 library(Matrix)
+
+randomized_pca <- function(tmat, d=10, seed=42){
+  # @param tmat A non-negative matrix with samples by features
+  # @return A matrix with features by samples projected on PCA space
+  set.seed(seed)
+  rsvd_obj <- rsvd(scale(tmat, center = TRUE, scale = FALSE), k=d)
+
+  t( rsvd_obj$u %*% diag(rsvd_obj$d) )
+
+}
+
+normlization_median <- function(mat){
+  # Median normalization
+  # @param mat A non-negative matrix with genes by samples
+  num_transcripts <- Matrix::colSums(mat)
+  size_factor <- median(num_transcripts, na.rm = T) / num_transcripts
+  t(t(mat) * size_factor)
+}
 
 freeman_tukey_transform <- function(mat){
   sqrt(mat) + sqrt(mat + 1)
 }
 
-pdist <- function(mat){
-  # @param mat A non-negative matrix with samples by features
+pdist <- function(tmat){
+  # @param tmat A non-negative matrix with samples by features
   # @reference http://r.789695.n4.nabble.com/dist-function-in-R-is-very-slow-td4738317.html
-  mtm <- Matrix::tcrossprod(mat)
-  sq <- rowSums(mat^2)
+  mtm <- Matrix::tcrossprod(tmat)
+  sq <- rowSums(tmat^2)
   out0 <- outer(sq, sq, "+") - 2 * mtm
   out0[out0 < 0] <- 0
 
   sqrt(out0)
-}
-
-smoother_calculate_distances <- function(mat){
-  # @param mat A matrix with genes by samples
-
-  # normalize to median transcript count
-  num_transcripts <- Matrix::colSums(mat)
-  size_factor <- median(num_transcripts, na.rm = T) / num_transcripts
-
-  mat_norm <- t(t(mat) * size_factor)
-  # apply freeman-tukey transform
-  mat_FTT <- freeman_tukey_transform(mat_norm)
-  # calculate all pairwise distances using the Euclidean metric
-  mat_D <- pdist(t(mat_FTT))
-
-  as.matrix(mat_D)
 }
 
 smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
@@ -48,7 +50,7 @@ smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
 
   sapply(seq_len(ncol(mat)), function(cid){
     nb_cid <- head(order(D[cid, ]), k)
-    closest_mat <- mat[, nb_cid]
+    closest_mat <- mat[, nb_cid, drop=FALSE]
     return(Matrix::rowSums(closest_mat))
   })
 }
@@ -57,6 +59,8 @@ smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
 #'
 #' @param mat A numeric matrix with gene names on rows and cell names on columns.
 #' @param k Number of nearest neighbours to aggregate.
+#' @param d Number of Principal components.
+#' @param seed Seed number. (default=42)
 #' @return A smoothed numeric matrix.
 #' @examples
 #' X <- matrix(abs(sin(seq(from=1, to=1000, length.out = 1000))),
@@ -69,8 +73,7 @@ smoother_aggregate_nearest_nb <- function(mat, D=NULL, k=5){
 #' plot(X[1, ], X[3, ], col=factor(y), main="original")
 #' plot(S[1, ], S[3, ], col=factor(y), main="smoothed")
 #' @export
-knn_smoother <- function(mat, k=5){
-  if (k >= ncol(mat)) stop('k should be less than the number of available samples.')
+knn_smoother <- function(mat, k, d=10, seed=42){
 
   cname <- colnames(mat)
   gname <- rownames(mat)
@@ -79,9 +82,13 @@ knn_smoother <- function(mat, k=5){
   S <- mat
   for (p in seq(1, num_powers)){
     k_step <- min(2^p - 1, k)
-    message(paste0('Step ', p, '/', num_powers, ':',
+    message(paste0('Step ', p, '/', num_powers, ': ',
                    'Smoothing using k=', k_step))
-    D <- smoother_calculate_distances(S)
+    Y <- freeman_tukey_transform(normlization_median(S))
+    if (! is.null(d)) {
+      Y <- randomized_pca(Y, d=d, seed=seed)
+    }
+    D <- pdist(t(Y))
     S <- smoother_aggregate_nearest_nb(mat, D, k_step + 1)
   }
   if (! is.null(cname)) colnames(S) <- cname
