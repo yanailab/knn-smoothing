@@ -4,7 +4,7 @@ This repository contains reference Python, R, and Matlab implementations of the 
 
 ### New! Version 2 of the algorithm released! (4/9/2018)
 
-Version 2 is a major improvement over our original algorithm, and performs much better whenever the data contains distinct cell populations with very similar expression profiles. Version 2 completely replaces the original version. It takes two parameters (`k` and `d`). `k` is the number of neighbors to use for smoothing (same as in the original version), and `d` is the number of principal components used for determining the nearest neighbors in each smoothing step. For most applications, the default value of `d=10` works well. See our [preprint](https://www.biorxiv.org/content/early/2018/04/09/217737) for a discussion of how to choose `k` and `d`.
+Version 2 is a major improvement over our original algorithm, and performs much better whenever the data contains cell populations with very similar expression profiles. Version 2 completely replaces the original version. It takes two parameters (`k` and `d`). `k` is the number of neighbors to use for smoothing (same as in the original version), and `d` is the number of principal components used for determining the nearest neighbors in each smoothing step. For most applications, the default value of `d=10` works well. See our [preprint](https://www.biorxiv.org/content/early/2018/04/09/217737) for a discussion of how to choose `k` and `d`.
 
 ### Running kNN-smoothing from the command-line
 
@@ -52,10 +52,10 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
 
 5. Run smoothing!
 
-   Let's say your (tab-separated) expression matrix file is called `expression.tsv`, and you saved it in the same directory as the "knn_smooth.py" script. Then, to run smoothing with `k=15`, you would use:
+   Let's say your (tab-separated) expression matrix file is called `expression.tsv`, and you saved it in the same directory as the "knn_smooth.py" script. Then, to run smoothing with `k=15` (and `d=10`), you would use:
 
    ``` bash
-   python3 knn_smooth.py --k 15 --fpath expression.tsv --saveto expression_smoothed.tsv
+   python3 knn_smooth.py -k 15 -f expression.tsv -o expression_smoothed.tsv
    ```
 
    This will produce a smoothed matrix called `expression_smoothed.tsv`.
