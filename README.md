@@ -4,7 +4,7 @@ This repository contains reference Python, R, and Matlab implementations of the 
 
 ### New! Version 2 of the algorithm released! (4/9/2018)
 
-Version 2 is a major improvement over our original algorithm, and performs much better whenever the data contains cell populations with very similar expression profiles. Version 2 completely replaces the original version. It takes two parameters (`k` and `d`). `k` is the number of neighbors to use for smoothing (same as in the original version), and `d` is the number of principal components used for determining the nearest neighbors in each smoothing step. For most applications, the default value of `d=10` works well. See our [preprint](https://www.biorxiv.org/content/early/2018/04/09/217737) for a discussion of how to choose `k` and `d`.
+Version 2 is a major improvement over our original algorithm, and performs much better whenever the data contains cell populations with very similar expression profiles. Version 2 completely replaces the original version. It takes two parameters (`k` and `d`). `k` is the number of neighbors to use for smoothing (same as in the original version), and `d` is the number of principal components used for determining the nearest neighbors in each smoothing step. For most applications, the default value of `d=10` works well. Please see our [preprint](https://www.biorxiv.org/content/early/2018/04/09/217737) for a discussion of how to choose `k` and `d`.
 
 ### Overview of the different implementations (Python/R/Matlab)
 
