@@ -6,6 +6,12 @@ This repository contains reference Python, R, and Matlab implementations of the 
 
 Version 2 is a major improvement over our original algorithm, and performs much better whenever the data contains cell populations with very similar expression profiles. Version 2 completely replaces the original version. It takes two parameters (`k` and `d`). `k` is the number of neighbors to use for smoothing (same as in the original version), and `d` is the number of principal components used for determining the nearest neighbors in each smoothing step. For most applications, the default value of `d=10` works well. See our [preprint](https://www.biorxiv.org/content/early/2018/04/09/217737) for a discussion of how to choose `k` and `d`.
 
+### Overview of the different implementations (Python/R/Matlab)
+
+Of the three implementations provided here, the Python implementation is the most thoroughly tested and the fastest. However, all implementations run reasonably fast - typically on the order of seconds or minutes for datasets containing < 5,000 cells. For larger datasets, we recommend using the Python implementation. The Python implementation also provides a command-line interface (see below), which makes it easy to use for non-Python users. 
+
+We strive to ensure the correctness of all implementations and to make them all as consistent as possible. However, due to differences in terms of how the randomized PCA is implemented in each language, there are currently small differences in the exact results produced by each implementation. We appreciate any reports of inconsistencies or suggestions for improvements.
+
 ### Running kNN-smoothing from the command-line
 
 Follow these instructions to run the Python implementation of kNN-smoothing from the command-line. This is the recommend method to run kNN-smoothing if you don't usually do your data analysis in Python, or if you prefer to work on the command-line.
