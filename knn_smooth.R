@@ -15,11 +15,11 @@ randomized_pca <- function(tmat, d, seed){
   set.seed(seed)
   #rsvd_obj <- rsvd(scale(tmat, center = TRUE, scale = FALSE), k=d)
   #rsvd_obj$u %*% diag(rsvd_obj$d)
-  rpca_obj <- rpca(tmat, k=d, center=T, scale=F, retx=T)
+  rpca_obj <- rpca(tmat, k=d, center=T, scale=F, retx=T, p=10, q=7)
   rpca_obj$x
 }
 
-normlization_median <- function(mat){
+normalization_median <- function(mat){
   # Median normalization
   # @param mat A non-negative matrix with genes by samples
   num_transcripts <- Matrix::colSums(mat)
@@ -84,7 +84,7 @@ knn_smoothing <- function(mat, k, d=10, seed=42){
     k_step <- min(2^p - 1, k)
     message(paste0('Step ', p, '/', num_steps, ': ',
                    'Smoothing using k=', k_step))
-    Y <- freeman_tukey_transform(normlization_median(S))
+    Y <- freeman_tukey_transform(normalization_median(S))
     if (! is.null(d)) {
       Y <- t(randomized_pca(t(Y), d=d, seed=seed))
     }
