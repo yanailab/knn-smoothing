@@ -10,6 +10,7 @@
 import time
 import sys
 from math import log, ceil
+import hashlib
 
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.decomposition import PCA
@@ -244,7 +245,9 @@ if __name__ == '__main__':
     @click.option('--sep', default='\t', show_default=False,
                   help='Separator used in input file. The output file will '
                        'use this separator as well.  [default: \\t]')
-    def main(k, d, fpath, saveto, seed, sep):
+    @click.option('--test', is_flag=True,
+                  help='Test if results for test data are correct.')
+    def main(k, d, fpath, saveto, seed, sep, test):
 
         if d == 0:
             d = None
@@ -270,5 +273,13 @@ if __name__ == '__main__':
         matrix.to_csv(saveto, sep=sep)
         t1 = time.time()
         print('done. (Took %.1f s.)' % (t1-t0))
+
+        if test:
+            with open(saveto, 'rb') as fh:
+                h = str(hashlib.md5(fh.read()).hexdigest())
+                if h == '0a565ca9e62de9be262c5d1c1c84c7a3':
+                    print('Test successful!!!')
+                else:
+                    raise ValueError('Output not correct!')
 
     main()

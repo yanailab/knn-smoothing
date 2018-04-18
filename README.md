@@ -52,7 +52,7 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
 
 4. Make sure your expression matrix file is formatted correctly
 
-   By default, the script expects your expression matrix to be stored as a tab-separated plain-text file, with gene labels contained in the first column, and cell labels contained in the first row (the top-left "cell" in the matrix can either be empty or contain the first cell label).
+   By default, the script expects your expression matrix to be stored as a tab-separated plain-text file, with gene labels contained in the first column, and cell labels contained in the first row (the top-left "cell" in the matrix can either be empty or contain the first cell label). A properly formatted example dataset (`test_expression.tsv`) is included in this repository.
 
    If your file uses a separator other than the tab character, you must specify it by passing the `--sep` argument to the script. For example, if you're using comma-separated values (csv), pass `--sep ,`.  This will also affect the separator used in the output file.
 
@@ -69,53 +69,45 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
 
 ### Example
 
-  Run kNN-smoothing 2 from the command-line:
+  Running kNN-smoothing 2 from the command-line, on the test dataset included
+  in this repository (`test_expression.tsv`):
+
   ``` bash
-  $ python3 knn_smooth.py -k 127 -d 5 -f smoothing_test_data1.tsv -o smoothing_test_results.tsv
+  $ python3 knn_smooth.py -k 31 -d 2 -f test_expression.tsv -o test_expression_smoothed.tsv
   ```
 
   Output:
   ```
-	Loading the data... done. (Took 3.1 s.)
-	The expression matrix contains 19208 genes and 2000 cells.
+	Loading the data... done. (Took 0.2 s.)
+	The expression matrix contains 7145 genes and 100 cells.
 
-	Performing kNN-smoothing 2 with k=127 and d=5...
-	Step 1/7: Smooth using k=1
-		PCA took 1.4 s.
-		The fraction of variance explained by the top 5 PCs is 4.8 %.
+	Performing kNN-smoothing 2 with k=31 and d=2...
+	Step 1/5: Smooth using k=1
+		PCA took 0.1 s.
+		The fraction of variance explained by the top 2 PCs is 4.6 %.
 		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 0.7 s.
-	Step 2/7: Smooth using k=3
-		PCA took 1.4 s.
-		The fraction of variance explained by the top 5 PCs is 6.3 %.
+		Calculating the smoothed expression matrix took 0.0 s.
+	Step 2/5: Smooth using k=3
+		PCA took 0.0 s.
+		The fraction of variance explained by the top 2 PCs is 8.0 %.
 		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 0.8 s.
-	Step 3/7: Smooth using k=7
-		PCA took 1.4 s.
-		The fraction of variance explained by the top 5 PCs is 8.4 %.
+		Calculating the smoothed expression matrix took 0.0 s.
+	Step 3/5: Smooth using k=7
+		PCA took 0.0 s.
+		The fraction of variance explained by the top 2 PCs is 14.5 %.
 		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 1.0 s.
-	Step 4/7: Smooth using k=15
-		PCA took 1.4 s.
-		The fraction of variance explained by the top 5 PCs is 11.7 %.
+		Calculating the smoothed expression matrix took 0.0 s.
+	Step 4/5: Smooth using k=15
+		PCA took 0.0 s.
+		The fraction of variance explained by the top 2 PCs is 25.8 %.
 		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 1.6 s.
-	Step 5/7: Smooth using k=31
-		PCA took 1.4 s.
-		The fraction of variance explained by the top 5 PCs is 16.9 %.
+		Calculating the smoothed expression matrix took 0.0 s.
+	Step 5/5: Smooth using k=31
+		PCA took 0.0 s.
+		The fraction of variance explained by the top 2 PCs is 49.4 %.
 		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 3.0 s.
-	Step 6/7: Smooth using k=63
-		PCA took 1.5 s.
-		The fraction of variance explained by the top 5 PCs is 25.4 %.
-		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 5.7 s.
-	Step 7/7: Smooth using k=127
-		PCA took 1.4 s.
-		The fraction of variance explained by the top 5 PCs is 38.7 %.
-		Calculating pair-wise distance matrix took 0.0 s.
-		Calculating the smoothed expression matrix took 10.6 s.
-	kNN-smoothing finished in 37.9 s.
+		Calculating the smoothed expression matrix took 0.1 s.
+	kNN-smoothing finished in 0.4 s.
 
-	Writing results to "smoothing_test_results.tsv"... done. (Took 24.0 s.)
+	Writing results to "../test_expression1_smoothed.tsv"... done. (Took 0.6 s.)
   ```
