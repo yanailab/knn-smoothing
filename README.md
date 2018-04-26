@@ -2,7 +2,19 @@
 
 This repository contains reference Python, R, and Matlab implementations of the kNN-smoothing and kNN-smoothing 2 algorithms ([Wagner et al., 2017](https://www.biorxiv.org/content/early/2018/04/09/217737)) for smoothing UMI-filtered single-cell RNA-Seq data.
 
-### New! Version 2 of the algorithm released! (4/9/2018)
+### Changelog
+
+#### 4/26/2018 - Version 2.1 released (at this point only for the Python/command-line implementation)
+
+*Version 2.1* improves upon the kNN-smoothing 2 algorithm, and has **three changes** compared to version 2:
+
+1. The definition of `k` (the number of neighbors used for smoothing) was changed to also include the cell to be smoothed itself. Previously, setting k=1 resulted in each cell being smoothed with its nearest neighbor (other than itself). Now, setting k=2 has this effect. This change in notation was made so that the values of `k` associated with each smoothing step are more intuitive (2, 4, 8, 16, 32, 64, ...). Performing kNN-smoothing with k=1 will now simply return a copy of the original matrix (i.e., no smoothing is performed).
+
+2. A new feature, *dither*, has been introduced to the algorithm. This is designed to avoid or reduce the artificial "clumping" of cells in the smoothed data (many cells having the exact same smoothed expression profile). These clumps form quite easily, because cells that share the same set of neighbors in any smoothing step become completely indistinguishable from one another. This is often undesirable, particularly when the underlying data comes from a continuous process (e.g., cell differentiation). Dither is artificial noise that we apply to each cell in principal component space, before determining the new sets of nearest neighbors. It introduces small, random differences between identifical or extremely similar cells, with the aim of making them choose slightly different sets of neighbors in the next smoothing step. The noise is sampled from a uniform distribution, and the amount of noise is controlled by the `dither` parameter, or the  `--dither` command-line argument (default: 0.03). It corresponds to the fraction of the range (maximum - minimum) of cell scores for each PC. Too much dither can negatively impact smoothing accuracy, but too little dither can result in artificial clumping of cells after smoothing. Setting dither to 0 will disable this feature.
+
+3. The new version no longer supports running the original kNN-smoothing (version 1) algorithm.
+
+#### 4/9/2018 - Version 2 of the algorithm released
 
 Version 2 is a major improvement over our original algorithm, and performs much better whenever the data contains cell populations with very similar expression profiles. Version 2 completely replaces the original version. It takes two parameters (`k` and `d`). `k` is the number of neighbors to use for smoothing (same as in the original version), and `d` is the number of principal components used for determining the nearest neighbors in each smoothing step. For most applications, the default value of `d=10` works well. Please see our [preprint](https://www.biorxiv.org/content/early/2018/04/09/217737) for a discussion of how to choose `k` and `d`.
 
@@ -73,41 +85,41 @@ Follow these instructions to run the Python implementation of kNN-smoothing from
   in this repository (`test_expression.tsv`):
 
   ``` bash
-  $ python3 knn_smooth.py -k 31 -d 2 -f test_expression.tsv -o test_expression_smoothed.tsv
+  $ python3 knn_smooth.py -k 32 -d 2 -f test_expression.tsv -o test_expression_smoothed.tsv
   ```
 
   Output:
   ```
-	Loading the data... done. (Took 0.2 s.)
+	Loading the data... done. (Took 0.1 s.)
 	The expression matrix contains 7145 genes and 100 cells.
 
-	Performing kNN-smoothing 2 with k=31 and d=2...
-	Step 1/5: Smooth using k=1
+	Performing kNN-smoothing with k=32, d=2, and dither=0.030...
+	Step 1/5: Smooth using k=2
 		PCA took 0.1 s.
 		The fraction of variance explained by the top 2 PCs is 4.6 %.
 		Calculating pair-wise distance matrix took 0.0 s.
 		Calculating the smoothed expression matrix took 0.0 s.
-	Step 2/5: Smooth using k=3
+	Step 2/5: Smooth using k=4
 		PCA took 0.0 s.
 		The fraction of variance explained by the top 2 PCs is 8.0 %.
 		Calculating pair-wise distance matrix took 0.0 s.
 		Calculating the smoothed expression matrix took 0.0 s.
-	Step 3/5: Smooth using k=7
+	Step 3/5: Smooth using k=8
 		PCA took 0.0 s.
-		The fraction of variance explained by the top 2 PCs is 14.5 %.
+		The fraction of variance explained by the top 2 PCs is 14.3 %.
 		Calculating pair-wise distance matrix took 0.0 s.
 		Calculating the smoothed expression matrix took 0.0 s.
-	Step 4/5: Smooth using k=15
+	Step 4/5: Smooth using k=16
 		PCA took 0.0 s.
-		The fraction of variance explained by the top 2 PCs is 25.8 %.
+		The fraction of variance explained by the top 2 PCs is 25.4 %.
 		Calculating pair-wise distance matrix took 0.0 s.
 		Calculating the smoothed expression matrix took 0.0 s.
-	Step 5/5: Smooth using k=31
+	Step 5/5: Smooth using k=32
 		PCA took 0.0 s.
-		The fraction of variance explained by the top 2 PCs is 49.4 %.
+		The fraction of variance explained by the top 2 PCs is 52.4 %.
 		Calculating pair-wise distance matrix took 0.0 s.
 		Calculating the smoothed expression matrix took 0.1 s.
-	kNN-smoothing finished in 0.4 s.
+	kNN-smoothing finished in 0.3 s.
 
-	Writing results to "../test_expression1_smoothed.tsv"... done. (Took 0.6 s.)
+	Writing results to "test_smoothing_smoothed.tsv"... done. (Took 0.5 s.)
   ```
