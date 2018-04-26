@@ -129,11 +129,11 @@ def _calculate_pairwise_distances(X, num_jobs=1):
     return D
 
 
-def knn_smoothing(
-        X, k, d=10, seed=0):
+def knn_smoothing(X, k, d=10, dither=0.03, seed=0):
     """K-nearest neighbor smoothing for UMI-filtered single-cell RNA-Seq data.
     
-    This function implements the kNN-smoothing 2 algorithm by Wagner et al.
+    This function implements an improved version of the kNN-smoothing 2
+    algorithm by Wagner et al.
     (https://www.biorxiv.org/content/early/2018/04/09/217737).
 
     Parameters
@@ -145,8 +145,11 @@ def knn_smoothing(
         The number of neighbors to use for smoothing.
     d : int, optional
         The number of principal components to use for identifying neighbors.
-        Setting this to None will lead to the invokation of the first
-        version of the kNN-smoothing algorithm (not recommended). Default: 10.
+        Default: 10.
+    dither : float, optional
+        Amount of dither to apply to the partially smoothed and PCA-transformed
+        data in each step. Specified as the fraction of the range of the
+        cell scores for each PC. Default: 0.03.
     seed : int, optional
         The seed for initializing the pseudo-random number generator used by
         the randomized PCA algorithm. This usually does not need to be changed.
@@ -164,43 +167,49 @@ def knn_smoothing(
     ------
     ValueError
         If X does not contain floating point values.
-        If k is invalid (k < 0, or k >= n).
-        If d is invalid (d < 0 or d > min(p, n-1)).
-    
+        If k is invalid (k < 1, or k >= n).
+        If d is invalid (d < 1 or d > # principal components).
     """
     
+    np.random.seed(seed)
+
     if not (X.dtype == np.float64 or X.dtype == np.float32):
         raise ValueError('X must contain floating point values! '
                          'Try X = np.float64(X).')
 
     p, n = X.shape
+    num_pcs = min(p, n-1)  # the number of principal components
 
-    if k < 0 or k > n:
-        raise ValueError('k must be between 0 and and n-1.')
-    if d is not None and (d < 1 or d > min(p, n-1)):
-        raise ValueError('d must be between 1 and min(p, n-1).')
+    if k < 1 or k > n:
+        raise ValueError('k must be between 1 and and %d.' % n)
+    if d < 1 or d > num_pcs:
+        raise ValueError('d must be between 1 and %d.' % num_pcs)
 
-    if d is not None:
-        print('Performing kNN-smoothing 2 with k=%d and d=%s...' % (k, str(d)))
-    else:
-        print('Performing kNN-smoothing (version 1) with k=%d...' % k)
+    print('Performing kNN-smoothing v2.1 with k=%d, d=%d, and dither=%.3f...'
+          % (k, d, dither))
     sys.stdout.flush()
 
     t0_total = time.time()
 
-    num_steps = ceil(log(k+1)/log(2))
+    if k == 1:
+        num_steps = 0
+    else:
+        num_steps = ceil(log(k)/log(2))
     
     S = X.copy()
     
     for t in range(1, num_steps+1):
-        k_step = min(pow(2, t)-1, k)
+        k_step = min(pow(2, t), k)
         print('Step %d/%d: Smooth using k=%d' % (t, num_steps, k_step))
         sys.stdout.flush()
         
-        if d is not None and d > 0:
-            Y = _calculate_pc_scores(S, d, seed=seed)
-        else:
-            Y = _freeman_tukey_transform(_median_normalize(S))
+        Y = _calculate_pc_scores(S, d, seed=seed)
+        if dither > 0:
+            for l in range(d):
+                ptp = np.ptp(Y[l, :])
+                dy = (np.random.rand(Y.shape[1])-0.5)*ptp*dither
+                Y[l, :] = Y[l, :] + dy
+            
 
         # determine cell-cell distances using smoothed matrix
         t0 = time.time()
@@ -212,7 +221,7 @@ def knn_smoothing(
         t0 = time.time()
         A = np.argsort(D, axis=1, kind='mergesort')
         for j in range(X.shape[1]):
-            ind = A[j, :(k_step+1)]
+            ind = A[j, :k_step]
             S[:, j] = np.sum(X[:, ind], axis=1)
 
         t1 = time.time()
@@ -233,29 +242,30 @@ if __name__ == '__main__':
 
     @click.command()
     @click.option('-k', type=int,
-                help='The number of neighbors to use for smoothing.')
+                  help='The number of neighbors to use for smoothing.')
     @click.option('-d', default=10, show_default=True,
-                help='The number of principal components used to identify '
-                    'neighbors. Set to 0 in order to invoke old version of '
-                    'kNN-smoothing (not recommended).')
+                  help='The number of principal components used to identify '
+                       'neighbors.')
+    @click.option('--dither', default=0.03, show_default=True,
+                  help='The amount of dither to apply to the partially '
+                       'smoothed and PCA-transformed data in each step. '
+                       'Specified as the faction of range of the scores of '
+                       'each PC.')
     @click.option('-f', '--fpath', help='The input UMI-count matrix.')
     @click.option('-o', '--saveto', help='The output matrix.')
     @click.option('-s', '--seed', default=0, show_default=True,
-                help='Seed for pseudo-random number generator.')
+                  help='Seed for pseudo-random number generator.')
     @click.option('--sep', default='\t', show_default=False,
                   help='Separator used in input file. The output file will '
                        'use this separator as well.  [default: \\t]')
     @click.option('--test', is_flag=True,
                   help='Test if results for test data are correct.')
-    def main(k, d, fpath, saveto, seed, sep, test):
-
-        if d == 0:
-            d = None
+    def main(k, d, dither, fpath, saveto, seed, sep, test):
 
         print('Loading the data...', end=' '); sys.stdout.flush()
         t0 = time.time()
         matrix = pd.read_csv(fpath, index_col=0, sep=sep).\
-                    astype(np.float64)
+                astype(np.float64)
         t1 = time.time()
         print('done. (Took %.1f s.)' % (t1-t0)); sys.stdout.flush()
         p, n = matrix.shape
@@ -263,7 +273,7 @@ if __name__ == '__main__':
         sys.stdout.flush()
         print()
 
-        S = knn_smoothing(matrix.values, k, d=d, seed=seed)
+        S = knn_smoothing(matrix.values, k, d=d, dither=dither, seed=seed)
         print()
 
         print('Writing results to "%s"...' % saveto, end=' ')
@@ -277,7 +287,7 @@ if __name__ == '__main__':
         if test:
             with open(saveto, 'rb') as fh:
                 h = str(hashlib.md5(fh.read()).hexdigest())
-                if h == '0a565ca9e62de9be262c5d1c1c84c7a3':
+                if h == 'c8ee70f41b141b781041075e280661ff':
                     print('Test successful!!!')
                 else:
                     raise ValueError('Output not correct!')
